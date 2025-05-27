@@ -1,0 +1,7 @@
+aiohttp
+httpx
+fastapi
+uvicorn
+pytest
+pytest-asyncio
+llama-index
