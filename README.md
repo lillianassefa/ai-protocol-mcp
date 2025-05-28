@@ -90,7 +90,8 @@ python -m pytest tests/
 ### Test Results
 
 ![MCP Server Test Results]
-![Screenshot from 2025-05-13 12-32-08](https://github.com/user-attachments/assets/d5c8dc45-8929-44d6-bff3-149665505a74)
+![Screenshot from 2025-05-29 00-01-48](https://github.com/user-attachments/assets/70125c14-4389-403e-91d8-9da3aa54ff51)
+
 
 **Test Results:** All tests for the MCP Proxy Gateway Server are passing, demonstrating robust functionality and error handling. Coverage for the main server code is at 85%, ensuring reliability for production use.
 
