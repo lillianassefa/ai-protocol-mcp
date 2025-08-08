@@ -1,0 +1,76 @@
+{
+    "mcpServers": {
+      "github": {
+        "command": "docker",
+        "args": [
+          "run",
+          "-i",
+          "--rm",
+          "-e",
+          "GITHUB_PERSONAL_ACCESS_TOKEN",
+          "ghcr.io/github/github-mcp-server"
+        ],
+        "env": {
+          "GITHUB_PERSONAL_ACCESS_TOKEN": "${input:github_token}"
+        }
+      },
+    "filesystem": {
+        "command": "docker",
+        "args": [
+          "run",
+          "-i",
+          "--rm",
+          "--mount", "type=bind,src=/home/lillian/,dst=/projects",
+          "mcp/filesystem",
+          "/projects"
+        ]
+      },
+      "mcp-atlassian": {
+        "command": "docker",
+        "args": [
+          "run",
+          "-i",
+          "--rm",
+          "-e", "CONFLUENCE_URL",
+          "-e", "CONFLUENCE_USERNAME",
+          "-e", "CONFLUENCE_API_TOKEN",
+          "-e", "JIRA_URL",
+          "-e", "JIRA_USERNAME",
+          "-e", "JIRA_API_TOKEN",
+          "ghcr.io/sooperset/mcp-atlassian:latest"
+        ],
+        "env": {
+          "CONFLUENCE_URL": "https://your-company.atlassian.net/wiki",
+          "CONFLUENCE_USERNAME": "your.email@company.com",
+          "CONFLUENCE_API_TOKEN": "your_confluence_api_token",
+          "JIRA_URL": "https://your-company.atlassian.net",
+          "JIRA_USERNAME": "your.email@company.com",
+          "JIRA_API_TOKEN": "your_jira_api_token"
+        }
+      },
+      "playwright": {
+        "command": "npx",
+        "args": [
+          "@playwright/mcp@latest",
+          "--isolated",
+          "--vision"
+        ]
+    },
+     "gdrive": {
+        "command": "npx",
+        "args": ["-y", "@isaacphi/mcp-gdrive"],
+        "env": {
+          "CLIENT_ID": "",
+          "CLIENT_SECRET": "",
+          "GDRIVE_CREDS_DIR": ""
+        }
+      },
+      "server-name": {
+        "url": "http://localhost:3000/mcp",
+        "headers": {
+          "API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMjMsImV4cCI6MTc1NDc0MzEzMH0.x8pQjJItZiGXfTZDNl5e-FXXvYycRN66ivxtQHtyAcU"
+        }
+      }
+    }
+  }
+    
