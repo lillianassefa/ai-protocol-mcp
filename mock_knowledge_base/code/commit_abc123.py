@@ -4,4 +4,9 @@ def apply_mobile_styles(button_element):
     if screen_width < 480:
         button_element.style.marginLeft = 'auto'
         button_element.style.marginRight = 'auto'
-    # ... other styles
+    else:
+        button_element.style.marginLeft = '10px'
+        button_element.style.marginRight = '10px'
+
+# ... other styles  
+
