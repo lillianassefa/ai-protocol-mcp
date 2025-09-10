@@ -3,6 +3,7 @@ import asyncio
 import subprocess
 import json
 import logging
+import os
 from typing import Dict, Any, Optional
 
 from fastmcp.client.transports import StdioTransport
@@ -25,7 +26,7 @@ configs = [
             "ghcr.io/github/github-mcp-server"
         ],
         "env": {
-            "GITHUB_PERSONAL_ACCESS_TOKEN": "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"
+            "GITHUB_PERSONAL_ACCESS_TOKEN": os.getenv("GITHUB_TOKEN", "your-github-token-here")
         },
     },
     {

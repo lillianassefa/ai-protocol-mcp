@@ -6,6 +6,7 @@ Shows examples of connecting to and using MCP servers
 
 import asyncio
 import json
+import os
 from fastmcp import Client
 from fastmcp.client.transports import StdioTransport
 
@@ -19,7 +20,7 @@ SERVERS = {
             "ghcr.io/github/github-mcp-server"
         ],
         "env": {
-            "GITHUB_PERSONAL_ACCESS_TOKEN": "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"
+            "GITHUB_PERSONAL_ACCESS_TOKEN": os.getenv("GITHUB_TOKEN", "your-github-token-here")
         }
     },
     "filesystem": {

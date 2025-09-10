@@ -17,7 +17,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # OpenAI configuration
-OPENAI_API_KEY = "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"
+import os
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "your-openai-key-here")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Server configurations
@@ -34,7 +35,7 @@ configs = [
             "ghcr.io/github/github-mcp-server"
         ],
         "env": {
-            "GITHUB_PERSONAL_ACCESS_TOKEN": "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"
+            "GITHUB_PERSONAL_ACCESS_TOKEN": os.getenv("GITHUB_TOKEN", "your-github-token-here")
         },
     },
     {
