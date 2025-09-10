@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Proxy Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        
+        .section h2 {
+            color: #555;
+            margin-top: 0;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #5a6fd8;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-healthy { background: #28a745; }
+        .status-unhealthy { background: #dc3545; }
+        .status-unknown { background: #6c757d; }
+        
+        .result-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 MCP Proxy Dashboard</h1>
+        
+        <!-- Server Status Section -->
+        <div class="section">
+            <h2>📊 Server Status</h2>
+            <button onclick="checkHealth()">Check Health</button>
+            <div id="healthResult" class="result-box" style="display: none;"></div>
+        </div>
+        
+        <!-- Available Tools Section -->
+        <div class="section">
+            <h2>🔧 Available Tools</h2>
+            <button onclick="listTools()">List All Tools</button>
+            <div id="toolsResult" class="result-box" style="display: none;"></div>
+        </div>
+        
+        <div class="grid">
+            <!-- GitHub Section -->
+            <div class="section">
+                <h2>🐙 GitHub Operations</h2>
+                <div class="form-group">
+                    <label for="issueTitle">Issue Title:</label>
+                    <input type="text" id="issueTitle" placeholder="Enter issue title">
+                </div>
+                <div class="form-group">
+                    <label for="issueBody">Issue Body:</label>
+                    <textarea id="issueBody" rows="3" placeholder="Enter issue description"></textarea>
+                </div>
+                <button onclick="createGitHubIssue()">Create GitHub Issue</button>
+                <div id="githubResult" class="result-box" style="display: none;"></div>
+            </div>
+            
+            <!-- Filesystem Section -->
+            <div class="section">
+                <h2>📁 Filesystem Operations</h2>
+                <div class="form-group">
+                    <label for="filePath">File Path:</label>
+                    <input type="text" id="filePath" placeholder="/path/to/file" value="/projects">
+                </div>
+                <button onclick="listFiles()">List Files</button>
+                <button onclick="readFile()">Read File</button>
+                <div id="filesystemResult" class="result-box" style="display: none;"></div>
+            </div>
+        </div>
+        
+        <div class="grid">
+            <!-- Atlassian Section -->
+            <div class="section">
+                <h2>🎫 Atlassian Operations</h2>
+                <div class="form-group">
+                    <label for="ticketTitle">Ticket Title:</label>
+                    <input type="text" id="ticketTitle" placeholder="Enter ticket title">
+                </div>
+                <div class="form-group">
+                    <label for="ticketDescription">Description:</label>
+                    <textarea id="ticketDescription" rows="3" placeholder="Enter ticket description"></textarea>
+                </div>
+                <button onclick="createAtlassianTicket()">Create Ticket</button>
+                <div id="atlassianResult" class="result-box" style="display: none;"></div>
+            </div>
+            
+            <!-- Custom Tool Call Section -->
+            <div class="section">
+                <h2>⚙️ Custom Tool Call</h2>
+                <div class="form-group">
+                    <label for="customToolName">Tool Name:</label>
+                    <input type="text" id="customToolName" placeholder="e.g., github_create_issue">
+                </div>
+                <div class="form-group">
+                    <label for="customArguments">Arguments (JSON):</label>
+                    <textarea id="customArguments" rows="3" placeholder='{"key": "value"}'></textarea>
+                </div>
+                <button onclick="callCustomTool()">Call Tool</button>
+                <div id="customResult" class="result-box" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        
+        async function apiCall(endpoint, method = 'GET', body = null) {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+                
+                const response = await fetch(`${API_BASE}${endpoint}`, options);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'API call failed');
+                }
+                
+                return data;
+            } catch (error) {
+                throw new Error(`API Error: ${error.message}`);
+            }
+        }
+        
+        function showResult(elementId, data) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.textContent = JSON.stringify(data, null, 2);
+        }
+        
+        async function checkHealth() {
+            try {
+                const result = await apiCall('/health');
+                showResult('healthResult', result);
+            } catch (error) {
+                showResult('healthResult', { error: error.message });
+            }
+        }
+        
+        async function listTools() {
+            try {
+                const result = await apiCall('/tools');
+                showResult('toolsResult', result);
+            } catch (error) {
+                showResult('toolsResult', { error: error.message });
+            }
+        }
+        
+        async function createGitHubIssue() {
+            const title = document.getElementById('issueTitle').value;
+            const body = document.getElementById('issueBody').value;
+            
+            if (!title) {
+                showResult('githubResult', { error: 'Please enter an issue title' });
+                return;
+            }
+            
+            try {
+                const result = await apiCall('/github/create-issue', 'POST', {
+                    title,
+                    body: body || 'No description provided'
+                });
+                showResult('githubResult', result);
+            } catch (error) {
+                showResult('githubResult', { error: error.message });
+            }
+        }
+        
+        async function listFiles() {
+            const path = document.getElementById('filePath').value || '/';
+            
+            try {
+                const result = await apiCall('/filesystem/list-files', 'POST', { path });
+                showResult('filesystemResult', result);
+            } catch (error) {
+                showResult('filesystemResult', { error: error.message });
+            }
+        }
+        
+        async function readFile() {
+            const path = document.getElementById('filePath').value;
+            
+            if (!path) {
+                showResult('filesystemResult', { error: 'Please enter a file path' });
+                return;
+            }
+            
+            try {
+                const result = await apiCall('/filesystem/read-file', 'POST', { path });
+                showResult('filesystemResult', result);
+            } catch (error) {
+                showResult('filesystemResult', { error: error.message });
+            }
+        }
+        
+        async function createAtlassianTicket() {
+            const title = document.getElementById('ticketTitle').value;
+            const description = document.getElementById('ticketDescription').value;
+            
+            if (!title) {
+                showResult('atlassianResult', { error: 'Please enter a ticket title' });
+                return;
+            }
+            
+            try {
+                const result = await apiCall('/atlassian/create-ticket', 'POST', {
+                    title,
+                    description: description || 'No description provided'
+                });
+                showResult('atlassianResult', result);
+            } catch (error) {
+                showResult('atlassianResult', { error: error.message });
+            }
+        }
+        
+        async function callCustomTool() {
+            const toolName = document.getElementById('customToolName').value;
+            const argumentsText = document.getElementById('customArguments').value;
+            
+            if (!toolName) {
+                showResult('customResult', { error: 'Please enter a tool name' });
+                return;
+            }
+            
+            let arguments = {};
+            if (argumentsText) {
+                try {
+                    arguments = JSON.parse(argumentsText);
+                } catch (error) {
+                    showResult('customResult', { error: 'Invalid JSON in arguments' });
+                    return;
+                }
+            }
+            
+            try {
+                const result = await apiCall('/tools/call', 'POST', {
+                    tool_name: toolName,
+                    arguments
+                });
+                showResult('customResult', result);
+            } catch (error) {
+                showResult('customResult', { error: error.message });
+            }
+        }
+        
+        // Check health on page load
+        document.addEventListener('DOMContentLoaded', checkHealth);
+    </script>
+</body>
+</html> 
